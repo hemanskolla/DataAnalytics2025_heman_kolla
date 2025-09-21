@@ -1,5 +1,6 @@
 library(readr)
 library(EnvStats)
+library(nortest)
 
 # set working directory (relative path)
 setwd("C:\\Users\\kollah\\OneDrive - Rensselaer Polytechnic Institute\\Documents\\DataAnalytics2025_heman_kolla\\Lab1\\sample")
@@ -172,3 +173,4 @@ wilcox.test(x,y)
 
 var.test(x,y)
 t.test(x,y)
+
