@@ -2,6 +2,7 @@
 
 library(readr)
 library(EnvStats)
+library(nortest)
 
 setwd("C:\\Users\\kollah\\OneDrive - Rensselaer Polytechnic Institute\\Documents\\DataAnalytics2025_heman_kolla\\Lab1")
 epi.data <- read_csv("sample\\epi_results_2024_pop_gdp.csv")
@@ -58,3 +59,34 @@ d2 <- dnorm(x2, mean=mean(TCG.noNA), sd=sd(TCG.noNA))
 lines(x2, d2)
 # lines(density(TCG.noNA, na.rm=TRUE, bw="SJ"))
 # rug(TCG.noNA) 
+
+# ECDF Plots
+plot(ecdf(ECO.noNA), do.points=FALSE, verticals=TRUE) 
+plot(ecdf(TCG.noNA), do.points=FALSE, verticals=TRUE) 
+
+# QQ Plot for ECO Against Normal Distribution
+qqnorm(ECO.noNA, main="QQ Plot of ECO vs Normal Distribution")
+qqline(ECO.noNA, col="red", lwd=2) 
+
+# QQ Plot for TCG Against Normal Distribution
+qqnorm(TCG.noNA, main="QQ Plot of TCG vs Normal Distribution")
+qqline(TCG.noNA, col="red", lwd=2) 
+
+# QQ Plot for ECO versus TCG
+qqplot(ECO.noNA, TCG.noNA, 
+       xlab = "Quantiles of ECO", 
+       ylab = "Quantiles of TCG", 
+       main = "QQ Plot: ECO vs TCG")
+abline(0, 1, col="red", lwd=2)
+
+# All Statistical Tests
+
+shapiro.test(ECO.noNA)
+shapiro.test(TCG.noNA)
+ad.test(ECO.noNA)
+ad.test(TCG.noNA)
+
+ks.test(ECO.noNA,TCG.noNA)
+wilcox.test(ECO.noNA,TCG.noNA)
+var.test(ECO.noNA,TCG.noNA)
+t.test(ECO.noNA,TCG.noNA)
