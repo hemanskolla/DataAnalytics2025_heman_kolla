@@ -7,4 +7,5 @@
 - Optimal k value to mazimize accuracy is: 25
 
 ## Exercise 2
-- 
+- Optimal k value for K-Means: 2
+- Optimal k value for PAM: 2

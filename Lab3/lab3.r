@@ -94,3 +94,54 @@ cat("\nThe optimal k value is:", best_k, "\n")
 # --------------------------
 
 # ---------------- Exercise 2 --------------------- 
+
+subset_best <- if (best_subset == "A") subset_A else subset_B # Select best Subset form Exercise 1
+subset_scaled <- scale(subset_best) # Data Preprocessing is this scaling step
+
+# NOTE. Silhouette is the standard metric for cluster quality
+
+# Computes average silhouette for k
+silhouette_for_k <- function(data, k) {
+  km <- kmeans(data, centers = k, nstart = 25)
+  ss <- silhouette(km$cluster, dist(data))
+  mean(ss[, 3])
+}
+
+# ----- Find optimal k (K-Means) -----
+k_range <- 2:10
+sil_kmeans <- sapply(k_range, function(k) silhouette_for_k(subset_scaled, k))
+best_k_kmeans <- k_range[which.max(sil_kmeans)]
+cat("Optimal K for K-Means:", best_k_kmeans, "\n")
+# ------------------------------------
+
+# Train final K-Means
+kmeans_final <- kmeans(subset_scaled, centers = best_k_kmeans, nstart = 25)
+sil_km_final <- silhouette(kmeans_final$cluster, dist(subset_scaled))
+
+# Make silhouette plot
+plot(
+  sil_km_final,
+  main = paste("Silhouette Plot - K-Means (K =", best_k_kmeans, ")")
+)
+
+# ----- Find optimal k (PAM) -----
+sil_pam <- c()
+for (k in k_range) {
+  pam_model <- pam(subset_scaled, k)
+  sil_pam <- c(sil_pam, pam_model$silinfo$avg.width)
+}
+
+best_k_pam <- k_range[which.max(sil_pam)]
+cat("Optimal K for PAM:", best_k_pam, "\n")
+# --------------------------------
+
+pam_final <- pam(subset_scaled, best_k_pam)
+
+# Make silhouette plot
+plot(
+  pam_final$silinfo$widths,
+  main = paste("Silhouette Plot - PAM (K =", best_k_pam, ")"),
+  xlab = "Cluster",
+  ylab = "Silhouette Width"
+)
+
