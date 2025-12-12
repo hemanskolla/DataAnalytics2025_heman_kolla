@@ -1,6 +1,7 @@
 # ------------------- IMPORTS -------------------
 
 library(readr)
+library(car)
 
 # ------------------- LOAD DATA -------------------
 
@@ -121,5 +122,39 @@ cor_target_df <- cor_target_df[order(abs(cor_target_df$Correlation_with_return),
 print(cor_target_df)
 
 # ------------------- MODEL 1 -------------------
+
+# Create combined dataframe
+df_model_one <- data.frame(y, x) 
+df_model_one <- df_model_one[!is.na(df_model_one$return..t.1.), ] # Clean first month NA, since this breaks model
+
+# Regress y on all other columns (20 features)
+model_one <- lm(y ~ ., data = df_model_one) 
+summary(model_one)
+
+# Check for multi-collinearity
+# NOTE. This should reflect some of what we saw in the heatmap from "cor_features"
+vif(model_one) 
+
+# Check model quality via residuals
+par(mfrow = c(2,2))
+plot(model_one)
+
+# --- Test PCR ---
+x_features <- df_model_one[, -1] # To keep PCA transformations separate
+x_scaled <- scale(x_features)
+
+# Perform PCA analysis
+pca <- prcomp(x_scaled, center = TRUE, scale. = TRUE)
+summary(pca)
+plot(pca, type = "l", main = "Scree Plot of PCA")
+
+# Create dataframe and model
+num_pcs <- 10
+pc_data <- data.frame(y = df_model_one$y, pca$x[, 1:num_pcs])
+model_pca <- lm(y ~ ., data = pc_data)
+summary(model_pca)
+
+# NOTE. The resulting 
+#-----------------
 
 # ------------------- MODEL 2 -------------------
