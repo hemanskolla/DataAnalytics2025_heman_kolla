@@ -2,6 +2,7 @@
 
 library(readr)
 library(car)
+library(e1071)
 
 # ------------------- LOAD DATA -------------------
 
@@ -154,7 +155,57 @@ pc_data <- data.frame(y = df_model_one$y, pca$x[, 1:num_pcs])
 model_pca <- lm(y ~ ., data = pc_data)
 summary(model_pca)
 
-# NOTE. The resulting 
+# NOTE. The resulting R-Squared value is not better than the original Multiple Regression Model.
 #-----------------
 
 # ------------------- MODEL 2 -------------------
+
+df_model_two <- data.frame(y, x) # Create combined dataframe
+df_model_two <- df_model_two[!apply(df_model_two, 1, function(row) any(is.na(row) | is.nan(row))), ]
+
+# Sample first
+set.seed(123)  # Reproducible randomness
+sub_idx <- sample(1:nrow(df_model_two), size = 20000) 
+df_sub <- df_model_two[sub_idx, ]
+
+# Scale the subsample
+x_scaled <- scale(df_sub[, -1])
+y_scaled <- scale(df_sub$y)
+df_scaled <- data.frame(y = y_scaled, x_scaled)
+
+# Save for unscaling:
+y_mean <- mean(df_sub$y)
+y_sd <- sd(df_sub$y)
+
+# Make Train/Test Split
+set.seed(123)  # Reproducible Randomness Seed
+train_idx <- sample(1:nrow(df_scaled), size = 0.8 * nrow(df_scaled))
+train <- df_scaled[train_idx, ]
+test <- df_scaled[-train_idx, ]
+
+# Train SVR model
+model_two <- svm(
+  y ~ ., 
+  data = train, 
+  type = "eps-regression",    # epsilon-SVR
+  kernel = "linear"           # Linear kernel
+)
+
+# NOTE. Linear kernel used in place of radial (RBF) since RBF is less time efficient
+
+# Predict
+y_pred <- predict(model_two, test)
+
+# Undo scaling using subsample stats
+y_pred_orig <- y_pred * y_sd + y_mean
+y_test_orig <- test$y * y_sd + y_mean
+
+# Calculate R-Squared
+r2 <- 1 - sum((y_test_orig - y_pred_orig)^2) / sum((y_test_orig - mean(y_test_orig))^2)
+cat("SVR R-squared:", r2, "\n")
+
+# Plot predictions vs actuals
+plot(y_test_orig, y_pred_orig, 
+     xlab = "Actual Returns", ylab = "Predicted Returns", 
+     main = "SVR Predictions vs Actuals", pch = 20, col = "blue")
+abline(0, 1, col = "red", lwd = 2)  # 45-degree reference line
