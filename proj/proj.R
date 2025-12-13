@@ -43,7 +43,7 @@ cat("Number of Total Observations:", total_observations,
     "\nNumber of Unique Firms:", total_firms, 
     "\nNumber of Unique Dates Measured:", total_dates, "\n")
 
-# ------------------- PRELIMINARY ANALYSIS -------------------
+# ------------------- PRELIMINARY ANALYSIS & EXPLORATORY ANALYSIS -------------------
 
 # Define features (exactly as in paper's Table A.2)
 FEATURE_COLS <- c(
@@ -60,6 +60,67 @@ y <- df[[TARGET_COL]]
 
 summary(x)
 summary(y)
+
+summary_stats <- function(v) {
+  c(
+    Min    = round(min(v, na.rm = TRUE), 4),
+    Q1     = round(quantile(v, 0.25, na.rm = TRUE), 4),
+    Median = round(median(v, na.rm = TRUE), 4),
+    Mean   = round(mean(v, na.rm = TRUE), 4),
+    Q3     = round(quantile(v, 0.75, na.rm = TRUE), 4),
+    Max    = round(max(v, na.rm = TRUE), 4)
+  )
+}
+
+# Initial Boxplots for x
+for (col in FEATURE_COLS) {
+  
+  v <- x[[col]]
+  stats <- summary_stats(v)
+  
+  par(mfrow = c(1, 2),        # boxplot + stats
+      mar = c(5, 4, 4, 1))    # margins
+  
+  # Boxplot
+  boxplot(v,
+          horizontal = TRUE,
+          col = "lightblue",
+          main = paste("Boxplot of", col),
+          xlab = col)
+  
+  # Summary stats panel
+  par(mar = c(5, 1, 4, 2))
+  plot.new()
+  text(
+    x = 0,
+    y = seq(0.9, 0.1, length.out = length(stats)),
+    labels = paste(names(stats), ":", stats),
+    adj = 0,
+    cex = 1.0
+  )
+  
+    par(mfrow = c(1, 1)) # Reset graphics parameters
+}
+
+# Initial Boxplot for y
+stats_y <- summary_stats(y)
+par(mfrow = c(1, 2),
+    mar = c(5, 4, 4, 1))
+boxplot(y,
+        horizontal = TRUE,
+        col = "lightblue",
+        main = "Boxplot of Return",
+        xlab = "Return")
+par(mar = c(5, 1, 4, 2))
+plot.new()
+text(
+  x = 0,
+  y = seq(0.9, 0.1, length.out = length(stats_y)),
+  labels = paste(names(stats_y), ":", stats_y),
+  adj = 0,
+  cex = 1.0
+)
+par(mfrow = c(1, 1))
 
 if(!dir.exists("plots")) {
   dir.create("plots")
