@@ -102,7 +102,7 @@ for (col in FEATURE_COLS) {
     par(mfrow = c(1, 1)) # Reset graphics parameters
 }
 
-# Initial Boxplot for y
+# Initial Boxplots for y
 stats_y <- summary_stats(y)
 par(mfrow = c(1, 2),
     mar = c(5, 4, 4, 1))
