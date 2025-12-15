@@ -1,3 +1,4 @@
 # R session history
 .Rhistory
 .RData
+*.csv
